@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Settings - Spitmed</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .settings-card {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .settings-card h2 {
+            margin-top: 0;
+            color: #1b7a3d;
+            font-size: 1.3rem;
+        }
+        
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .settings-row:last-child {
+            border-bottom: none;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #1b7a3d;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .test-button {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">Spitmed</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="#about">About us</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <div class="search-container">
+            <input type="search" placeholder="Search here">
+        </div>
+        <div class="auth-buttons">
+            <button id="loginBtn" onclick="showPage('login')" class="btn secondary">Login</button>
+            <button id="logoutBtn" onclick="logout()" class="btn secondary" style="display: none;">Logout</button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="settings-container">
+            <h1>Notification Settings</h1>
+            <p>Configure how you want to be reminded about your medicines</p>
+            
+            <div class="settings-card">
+                <h2>Browser Notifications</h2>
+                <div class="settings-row">
+                    <div>
+                        <h3>Enable Notifications</h3>
+                        <p>Receive notifications when it's time to take your medicine</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notification-toggle" onchange="toggleNotifications()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-row">
+                    <div>
+                        <h3>Test Notification</h3>
+                        <p>Send a test notification to verify your settings</p>
+                    </div>
+                    <button class="test-button" onclick="testNotification()">Test</button>
+                </div>
+            </div>
+            
+            <div class="settings-card">
+                <h2>Sound Settings</h2>
+                <div class="settings-row">
+                    <div>
+                        <h3>Notification Sound</h3>
+                        <p>Play a sound when a notification appears</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="sound-toggle" checked onchange="toggleSound()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="settings-row">
+                    <div>
+                        <h3>Test Sound</h3>
+                        <p>Play the notification sound</p>
+                    </div>
+                    <button class="test-button" onclick="testSound()">Play</button>
+                </div>
+            </div>
+            
+            <button class="btn primary" onclick="saveSettings()">Save Settings</button>
+            <button class="btn secondary" onclick="window.location.href='index.html'">Back to Home</button>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize notification toggle based on permission
+            const notificationToggle = document.getElementById("notification-toggle");
+            notificationToggle.checked = Notification.permission === "granted";
+            notificationToggle.disabled = Notification.permission === "denied";
+            
+            // Initialize sound toggle based on localStorage
+            const soundToggle = document.getElementById("sound-toggle");
+            soundToggle.checked = localStorage.getItem("notificationSound") !== "disabled";
+        });
+        
+        function toggleNotifications() {
+            const toggle = document.getElementById("notification-toggle");
+            
+            if (toggle.checked) {
+                requestNotificationPermission();
+            }
+        }
+        
+        function toggleSound() {
+            const toggle = document.getElementById("sound-toggle");
+            localStorage.setItem("notificationSound", toggle.checked ? "enabled" : "disabled");
+        }
+        
+        function testSound() {
+            // Create audio element
+            const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+            audio.play().catch(err => console.error("Error playing sound:", err));
+        }
+        
+        function saveSettings() {
+            alert("Settings saved successfully!");
+        }
+    </script>
+</body>
+</html>

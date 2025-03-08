@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP8266 Integration - Spitmed</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .esp-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .tab-container {
+            margin-top: 2rem;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-button {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .tab-button.active {
+            border-bottom: 2px solid #1b7a3d;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 1rem 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .connection-status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        
+        .status-connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-failed {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .code-block {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            white-space: pre;
+            margin: 1rem 0;
+        }
+        
+        .step-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">Spitmed</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="notification-settings.html">Notifications</a>
+            <a href="#about">About us</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <div class="search-container">
+            <input type="search" placeholder="Search here">
+        </div>
+        <div class="auth-buttons">
+            <button id="loginBtn" onclick="showPage('login')" class="btn secondary">Login</button>
+            <button id="logoutBtn" onclick="logout()" class="btn secondary" style="display: none;">Logout</button>
+        </div>
+    </nav>
+
+    <main>
+        <div class="esp-container">
+            <h1>ESP8266 Integration</h1>
+            <p>Connect your ESP8266 device to receive physical alerts for medicine reminders</p>
+            
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="openTab(event, 'connect')">Connect Device</button>
+                    <button class="tab-button" onclick="openTab(event, 'setup')">Setup Guide</button>
+                    <button class="tab-button" onclick="openTab(event, 'code')">ESP8266 Code</button>
+                </div>
+                
+                <div id="connect" class="tab-content active">
+                    <h2>Connect to ESP8266</h2>
+                    <p>Enter the IP address of your ESP8266 device to connect:</p>
+                    
+                    <div class="form-group">
+                        <label for="deviceIP">ESP8266 IP Address</label>
+                        <div style="display: flex; gap: 1rem;">
+                            <input type="text" id="deviceIP" placeholder="192.168.1.100">
+                            <button id="connectBtn" class="btn primary">Connect</button>
+                        </div>
+                    </div>
+                    
+                    <div id="connectionStatus"></div>
+                    
+                    <div id="testAlertContainer" style="margin-top: 1rem; display: none;">
+                        <button id="testAlertBtn" class="btn secondary">Send Test Alert</button>
+                        <p style="margin-top: 0.5rem; font-size: 0.9rem;">This will send a test alert to your ESP8266 device.</p>
+                    </div>
+                </div>
+                
+                <div id="setup" class="tab-content">
+                    <h2>ESP8266 Setup Guide</h2>
+                    
+                    <div class="step-container">
+                        <div class="step-title">1. Hardware Requirements</div>
+                        <ul>
+                            <li>ESP8266 NodeMCU or similar ESP8266-based board</li>
+                            <li>USB cable for programming</li>
+                            <li>Buzzer or LED for alerts (optional)</li>
+                            <li>Breadboard and jumper wires (optional)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step-container">
+                        <div class="step-title">2. Software Setup</div>
+                        <ul>
+                            <li>Install Arduino IDE from <a href="https://www.arduino.cc/en/software" target="_blank">arduino.cc</a></li>
+                            <li>Add ESP8266 board support:
+                                <ul>
+                                    <li>Go to File → Preferences</li>
+                                    <li>Add <code>http://arduino.esp8266.com/stable/package_esp8266com_index.json</code> to Additional Boards Manager URLs</li>
+                                </ul>
+                            </li>
+                            <li>Go to Tools → Board → Boards Manager, search for ESP8266 and install</li>
+                            <li>Install required libraries: Sketch → Include Library → Manage Libraries
+                                <ul>
+                                    <li>ArduinoJson</li>
+                                    <li>ESP8266WiFi</li>
+                                    <li>ESP8266WebServer</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step-container">
+                        <div class="step-title">3. Upload the Code</div>
+                        <ul>
+                            <li>Copy the code from the "ESP8266 Code" tab</li>
+                            <li>Open Arduino IDE and paste the code</li>
+                            <li>Update the WiFi credentials (SSID and password)</li>
+                            <li>Select your board: Tools → Board → ESP8266 Boards → NodeMCU 1.0</li>
+                            <li>Select the correct port: Tools → Port → (select your device)</li>
+                            <li>Click Upload button (right arrow icon)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step-container">
+                        <div class="step-title">4. Find the IP Address</div>
+                        <ul>
+                            <li>Open the Serial Monitor: Tools → Serial Monitor</li>
+                            <li>Set baud rate to 115200</li>
+                            <li>The ESP8266 will print its IP address when connected to WiFi</li>
+                            <li>Note this IP address to use in the "Connect Device" tab</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step-container">
+                        <div class="step-title">5. Connect to Your Application</div>
+                        <ul>
+                            <li>Enter the IP address in the "Connect Device" tab</li>
+                            <li>Click "Connect" to establish a connection</li>
+                            <li>Test the connection by sending a test alert</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div id="code" class="tab-content">
+                    <h2>ESP8266 Arduino Code</h2>
+                    <p>Copy and paste this code into your Arduino IDE:</p>
+                    
+                    <div class="code-block">#include &lt;ESP8266WiFi.h&gt;
+#include &lt;ESP8266WebServer.h&gt;
+#include &lt;ArduinoJson.h&gt;
+
+// WiFi credentials
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
+
+// Pin definitions
+const int BUZZER_PIN = D1;  // Buzzer connected to D1
+const int LED_PIN = D2;     // LED connected to D2
+
+ESP8266WebServer server(80);
+
+void setup() {
+  Serial.begin(115200);
+  
+  // Initialize pins
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
+  
+  // Turn off devices initially
+  digitalWrite(BUZZER_PIN, LOW);
+  digitalWrite(LED_PIN, LOW);
+  
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+  
+  // Set up server routes
+  server.on("/", HTTP_GET, handleRoot);
+  server.on("/connect", HTTP_GET, handleConnect);
+  server.on("/alert", HTTP_POST, handleAlert);
+  
+  // Start server
+  server.begin();
+  Serial.println("HTTP server started");
+}
+
+void loop() {
+  server.handleClient();
+}
+
+void handleRoot() {
+  String html = "&lt;html&gt;&lt;body&gt;";
+  html += "&lt;h1&gt;Spitmed ESP8266 Medicine Reminder&lt;/h1&gt;";
+  html += "&lt;p&gt;Status: Online&lt;/p&gt;";
+  html += "&lt;p&gt;IP Address: " + WiFi.localIP().toString() + "&lt;/p&gt;";
+  html += "&lt;/body&gt;&lt;/html&gt;";
+  
+  server.send(200, "text/html", html);
+}
+
+void handleConnect() {
+  server.send(200, "application/json", "{\"status\":\"connected\"}");
+}
+
+void handleAlert() {
+  if (server.hasArg("plain")) {
+    String body = server.arg("plain");
+    
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, body);
+    
+    if (error) {
+      server.send(400, "application/json", "{\"status\":\"error\",\"message\":\"Invalid JSON\"}");
+      return;
+    }
+    
+    String message = doc["message"];
+    int duration = doc["duration"] | 5000;  // Default 5 seconds
+    
+    // Activate alert
+    digitalWrite(LED_PIN, HIGH);
+    tone(BUZZER_PIN, 1000);  // 1kHz tone
+    
+    // Schedule alert to stop after duration
+    server.send(200, "application/json", "{\"status\":\"success\",\"message\":\"Alert activated\"}");
+    
+    // Use a non-blocking approach to stop the alert after duration
+    static unsigned long alertEndTime = 0;
+    alertEndTime = millis() + duration;
+    
+    // We need to check in loop() if it's time to stop the alert
+    // This is a simple approach - in a real application, you might want to use a timer
+    delay(duration);
+    
+    // Stop alert
+    digitalWrite(LED_PIN, LOW);
+    noTone(BUZZER_PIN);
+  } else {
+    server.send(400, "application/json", "{\"status\":\"error\",\"message\":\"No data provided\"}");
+  }
+}</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <button onclick="window.location.href='index.html'" class="btn secondary">Back to Home</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // Tab functionality
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+            
+            const tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        // ESP8266 connection functionality
+        document.addEventListener("DOMContentLoaded", function() {
+            const connectBtn = document.getElementById("connectBtn");
+            const testAlertBtn = document.getElementById("testAlertBtn");
+            const deviceIPInput = document.getElementById("deviceIP");
+            const connectionStatus = document.getElementById("connectionStatus");
+            const testAlertContainer = document.getElementById("testAlertContainer");
+            
+            let deviceIP = "";
+            
+            connectBtn.addEventListener("click", function() {
+                deviceIP = deviceIPInput.value.trim();
+                
+                if (!deviceIP) {
+                    connectionStatus.innerHTML = '<div class="connection-status status-failed">Please enter a valid IP address</div>';
+                    return;
+                }
+                
+                connectionStatus.innerHTML = '<div>Connecting...</div>';
+                
+                // Try to connect to the ESP8266
+                fetch(`http://${deviceIP}/connect`)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error("Failed to connect");
+                    })
+                    .then(data => {
+                        connectionStatus.innerHTML = '<div class="connection-status status-connected">Successfully connected to ESP8266 device</div>';
+                        testAlertContainer.style.display = "block";
+                    })
+                    .catch(error => {
+                        console.error("Error connecting to ESP8266:", error);
+                        connectionStatus.innerHTML = '<div class="connection-status status-failed">Failed to connect to ESP8266. Please check the IP address and ensure the device is powered on.</div>';
+                        testAlertContainer.style.display = "none";
+                    });
+            });
+            
+            testAlertBtn.addEventListener("click", function() {
+                if (!deviceIP) {
+                    return;
+                }
+                
+                fetch(`http://${deviceIP}/alert`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        message: "Test Alert",
+                        duration: 3000,
+                    }),
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error("Failed to send alert");
+                    })
+                    .then(data => {
+                        alert("Test alert sent successfully");
+                    })
+                    .catch(error => {
+                        console.error("Error sending alert:", error);
+                        alert("Failed to send test alert");
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
